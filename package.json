@@ -1,0 +1,19 @@
+{
+  "name": "house-sales",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Milkjake/house-sales.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Milkjake/house-sales/issues"
+  },
+  "homepage": "https://github.com/Milkjake/house-sales#readme"
+}
