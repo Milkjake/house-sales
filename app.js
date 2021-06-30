@@ -1,4 +1,6 @@
 const axios = require("axios");
+const transporter = require("./mailer/transporter");
+const { createMailOptions } = require("./mailer/mailOptions");
 const { cardsRequestPayload } = require("./cards/cards-request-payload");
 
 const ADDRESS_URI = "https://www.homes.co.nz/address";
@@ -56,5 +58,11 @@ exports.houseSales = async (req, res) => {
     })
   );
 
-  console.log(suburbsData);
+  try {
+    await transporter.sendMail(
+      createMailOptions("New Houses for sale", suburbsData)
+    );
+  } catch (err) {
+    throw err;
+  }
 };
