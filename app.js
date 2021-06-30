@@ -1,22 +1,60 @@
 const axios = require("axios");
 const { cardsRequestPayload } = require("./cards/cards-request-payload");
 
-const ADDRESS_URI = "https://gateway.homes.co.nz/address";
+const ADDRESS_URI = "https://www.homes.co.nz/address";
 const ADDRESS_SUBURB_URI = "https://gateway.homes.co.nz/address-suburb";
 const CARDS_URI = "https://gateway.homes.co.nz/map/cards";
 
-(async function () {
+exports.houseSales = async (req, res) => {
   const addressSuburbRes = await axios.get(
-    ADDRESS_SUBURB_URI + "/wellington,johnsonville"
+    ADDRESS_SUBURB_URI + "/wellington,karori"
   );
 
   const {
     suburb: { suburbs },
   } = addressSuburbRes.data;
 
-  cardsRequestPayload.polylines = suburbs[0].boundary;
+  let suburbsData = await Promise.all(
+    suburbs.map(async (suburb) => {
+      const { boundary, name, city_name } = suburb;
 
-  const cardsRes = await axios.post(CARDS_URI, cardsRequestPayload);
+      try {
+        cardsRequestPayload.polylines = boundary;
 
-  console.log(cardsRes.data);
-})();
+        const cardsRes = await axios.post(CARDS_URI, cardsRequestPayload);
+
+        const { cards } = cardsRes.data;
+
+        const properties = cards.map((card) => {
+          const {
+            date,
+            url,
+            property_details: {
+              address,
+              display_estimated_value_short,
+              display_estimated_lower_value_short,
+              display_estimated_upper_value_short,
+            },
+          } = card;
+
+          return {
+            address,
+            url: ADDRESS_URI + url,
+            dateAdded: date,
+            estimateValue: display_estimated_value_short,
+            estimateRange:
+              display_estimated_lower_value_short +
+              " - " +
+              display_estimated_upper_value_short,
+          };
+        });
+
+        return { suburb: name, city: city_name, properties };
+      } catch (err) {
+        throw err;
+      }
+    })
+  );
+
+  console.log(suburbsData);
+};
