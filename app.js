@@ -1,5 +1,6 @@
+require("dotenv").config();
 const axios = require("axios");
-const transporter = require("./mailer/transporter");
+const { transporter } = require("./mailer/transporter");
 const { createMailOptions } = require("./mailer/mailOptions");
 const { cardsRequestPayload } = require("./cards/cards-request-payload");
 
