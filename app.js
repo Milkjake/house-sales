@@ -61,7 +61,8 @@ exports.houseSales = async (req, res) => {
 
   try {
     await transport.sendMail(
-      createMailOptions("New Houses for sale", suburbsData)
+      //   createMailOptions("New Houses for sale", suburbsData)
+      createMailOptions("New Houses for sale", suburbsData.toString())
     );
   } catch (err) {
     throw err;
