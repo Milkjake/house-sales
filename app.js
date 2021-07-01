@@ -1,6 +1,6 @@
 require("dotenv").config();
 const axios = require("axios");
-const { transporter } = require("./mailer/transporter");
+const { transport } = require("./mailer/transport");
 const { createMailOptions } = require("./mailer/mailOptions");
 const { cardsRequestPayload } = require("./cards/cards-request-payload");
 
@@ -60,7 +60,7 @@ exports.houseSales = async (req, res) => {
   );
 
   try {
-    await transporter.sendMail(
+    await transport.sendMail(
       createMailOptions("New Houses for sale", suburbsData)
     );
   } catch (err) {
