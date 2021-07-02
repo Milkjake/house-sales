@@ -1,4 +1,5 @@
 require("dotenv").config();
+const _ = require("lodash");
 const axios = require("axios");
 const { transport } = require("./mailer/transport");
 const { textFormatter } = require("./mailer/textFormatter");
@@ -33,7 +34,7 @@ exports.houseSales = async (req, res) => {
     })
   );
 
-  suburbs = suburbs.flat();
+  suburbs = _.uniqBy(suburbs.flat(), "id");
 
   let suburbsData = await Promise.all(
     suburbs.map(async (suburb) => {
@@ -94,7 +95,7 @@ exports.houseSales = async (req, res) => {
       createMailOptions(
         "New Houses for sale",
         suburbsData.length > 0
-          ? textFormatter(suburbsData)
+          ? textFormatter(_.sortBy(suburbsData, "suburb"))
           : "No new houses for sale"
       )
     );
