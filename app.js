@@ -9,6 +9,8 @@ const ADDRESS_URI = "https://www.homes.co.nz/address";
 const ADDRESS_SUBURB_URI = "https://gateway.homes.co.nz/address-suburb";
 const CARDS_URI = "https://gateway.homes.co.nz/map/cards";
 
+const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
+
 exports.houseSales = async (req, res) => {
   const addressSuburbRes = await axios.get(
     ADDRESS_SUBURB_URI + "/wellington,johnsonville"
@@ -17,6 +19,8 @@ exports.houseSales = async (req, res) => {
   const {
     suburb: { suburbs },
   } = addressSuburbRes.data;
+
+  const now = Date.now();
 
   let suburbsData = await Promise.all(
     suburbs.map(async (suburb) => {
@@ -29,7 +33,7 @@ exports.houseSales = async (req, res) => {
 
         const { cards } = cardsRes.data;
 
-        const properties = cards.map((card) => {
+        const properties = cards.reduce((accProperties, currCard) => {
           const {
             date,
             url,
@@ -39,19 +43,26 @@ exports.houseSales = async (req, res) => {
               display_estimated_lower_value_short,
               display_estimated_upper_value_short,
             },
-          } = card;
+          } = currCard;
 
-          return {
-            address,
-            url: ADDRESS_URI + url,
-            dateAdded: date,
-            estimateValue: display_estimated_value_short,
-            estimateRange:
-              display_estimated_lower_value_short +
-              " - " +
-              display_estimated_upper_value_short,
-          };
-        });
+          if (now - new Date(date) < TWO_DAYS) {
+            return [
+              ...accProperties,
+              {
+                address,
+                url: ADDRESS_URI + url,
+                dateAdded: date,
+                estimateValue: display_estimated_value_short,
+                estimateRange:
+                  display_estimated_lower_value_short +
+                  " - " +
+                  display_estimated_upper_value_short,
+              },
+            ];
+          }
+
+          return accProperties;
+        }, []);
 
         return { suburb: name, city: city_name, properties };
       } catch (err) {
@@ -60,9 +71,19 @@ exports.houseSales = async (req, res) => {
     })
   );
 
+  suburbsData = suburbsData.filter((suburb) => {
+    const { properties } = suburb;
+    return properties.length > 0;
+  });
+
   try {
     await transport.sendMail(
-      createMailOptions("New Houses for sale", textFormatter(suburbsData))
+      createMailOptions(
+        "New Houses for sale",
+        suburbsData.length > 0
+          ? textFormatter(suburbsData)
+          : "No new houses for sale"
+      )
     );
   } catch (err) {
     throw err;
