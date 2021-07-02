@@ -67,4 +67,6 @@ exports.houseSales = async (req, res) => {
   } catch (err) {
     throw err;
   }
+
+  return { status: "success", statusCode: "200" };
 };
