@@ -11,7 +11,7 @@ const CARDS_URI = "https://gateway.homes.co.nz/map/cards";
 
 exports.houseSales = async (req, res) => {
   const addressSuburbRes = await axios.get(
-    ADDRESS_SUBURB_URI + "/wellington,khandallah"
+    ADDRESS_SUBURB_URI + "/wellington,johnsonville"
   );
 
   const {

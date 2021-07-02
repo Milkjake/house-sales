@@ -3,12 +3,14 @@ exports.textFormatter = function (suburbsData) {
     const { suburb, city, properties } = currSuburb;
 
     if (properties.length > 0) {
-      accText += suburb + ", " + city + "\n";
+      const suburbHeading = suburb + ", " + city + "\n";
+
+      accText += suburbHeading;
       accText += properties.reduce((accPropertyText, currProperty) => {
         const { address, url, dateAdded, estimateValue, estimateRange } =
           currProperty;
 
-        accPropertyText +=
+        const propertyText =
           "\t address: " +
           address +
           "\n" +
@@ -16,19 +18,21 @@ exports.textFormatter = function (suburbsData) {
           url +
           "\n" +
           "\t date added: " +
-          dateAdded +
+          new Date(dateAdded).toLocaleString() +
           "\n" +
-          "\t estimated value:" +
+          "\t estimated value: " +
           estimateValue +
           "\n" +
-          "\t estimated range:" +
+          "\t estimated range: " +
           estimateRange +
           "\n\n";
 
+        accPropertyText += propertyText;
+
         return accPropertyText;
       }, "");
-      return accText;
     }
-    return "";
+
+    return accText;
   }, "");
 };
