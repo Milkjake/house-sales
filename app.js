@@ -12,15 +12,28 @@ const CARDS_URI = "https://gateway.homes.co.nz/map/cards";
 const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
 exports.houseSales = async (req, res) => {
-  const addressSuburbRes = await axios.get(
-    ADDRESS_SUBURB_URI + "/wellington,johnsonville"
+  const now = Date.now();
+  const suburbsToQuery = process.env.SUBURBS_TO_QUERY.split(",");
+
+  let suburbs = await Promise.all(
+    suburbsToQuery.map(async (suburbToQuery) => {
+      try {
+        const suburbToQueryRes = await axios.get(
+          ADDRESS_SUBURB_URI + "/wellington," + suburbToQuery
+        );
+
+        const {
+          suburb: { suburbs },
+        } = suburbToQueryRes.data;
+
+        return suburbs;
+      } catch (err) {
+        throw err;
+      }
+    })
   );
 
-  const {
-    suburb: { suburbs },
-  } = addressSuburbRes.data;
-
-  const now = Date.now();
+  suburbs = suburbs.flat();
 
   let suburbsData = await Promise.all(
     suburbs.map(async (suburb) => {
