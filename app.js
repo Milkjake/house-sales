@@ -14,27 +14,27 @@ const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
 exports.houseSales = async (req, res) => {
   const now = Date.now();
-  const suburbsToQuery = process.env.SUBURBS_TO_QUERY.split(",");
+  const suburbsToQuery = process.env.SUBURBS_TO_QUERY.split(" ");
 
   let suburbs = await Promise.all(
     suburbsToQuery.map(async (suburbToQuery) => {
       try {
         const suburbToQueryRes = await axios.get(
-          ADDRESS_SUBURB_URI + "/wellington," + suburbToQuery
+          ADDRESS_SUBURB_URI + "/" + suburbToQuery
         );
 
-        const {
-          suburb: { suburbs },
-        } = suburbToQueryRes.data;
+        const { suburb, error } = suburbToQueryRes.data;
 
-        return suburbs;
+        if (error) return null;
+
+        return suburb.suburbs;
       } catch (err) {
         throw err;
       }
     })
   );
 
-  suburbs = _.uniqBy(suburbs.flat(), "id");
+  suburbs = _.uniqBy(suburbs.filter((suburb) => suburb !== null).flat(), "id");
 
   let suburbsData = await Promise.all(
     suburbs.map(async (suburb) => {
