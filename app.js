@@ -10,7 +10,8 @@ const ADDRESS_URI = "https://www.homes.co.nz/address";
 const ADDRESS_SUBURB_URI = "https://gateway.homes.co.nz/address-suburb";
 const CARDS_URI = "https://gateway.homes.co.nz/map/cards";
 
-const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
+const ONE_MINUTE = 60 * 1000;
+const ONE_DAY = 24 * 60 * 60 * 1000;
 
 exports.houseSales = async (req, res) => {
   const now = Date.now();
@@ -59,7 +60,8 @@ exports.houseSales = async (req, res) => {
             },
           } = currCard;
 
-          if (now - new Date(date) < TWO_DAYS) {
+          // Property posted earlier than one day + one minute (for padding)
+          if (now - new Date(date) < ONE_DAY + ONE_MINUTE) {
             return [
               ...accProperties,
               {
